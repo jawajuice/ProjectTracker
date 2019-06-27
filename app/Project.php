@@ -11,4 +11,8 @@ class Project extends Model
 
     	return $this->belongsTo(Employee::class);
     }
+    public function milestone(){ 
+
+    	return $this->belongsTo('App\Milestone', 'milestone_id');
+    }
 }

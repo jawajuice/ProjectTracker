@@ -21,7 +21,7 @@ class CreateProjectsTable extends Migration
             $table->timestamps();
             $table->string('reference');
             $table->string('title');
-            $table->string('description')->nullable();
+            $table->text('description')->nullable();
             $table->string('starts_on');
             $table->string('due_on');
         });

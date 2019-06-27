@@ -12,4 +12,8 @@ class Task extends Model
 
     	return $this->belongsTo('App\Milestone', 'milestone_id');
     }
+    public function employee(){ 
+
+    	return $this->belongsTo('App\Employee', 'employee_id');
+    }
 }

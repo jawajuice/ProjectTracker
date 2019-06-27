@@ -17,7 +17,7 @@ class CreateTasksTable extends Migration
             $table->bigIncrements('id');
             $table->timestamps();
             $table->string('task_id');
-            $table->string('description');
+            $table->text('description');
             $table->boolean('completed');
             $table->string('completed_at')->nullable();
             $table->string('est_duration');

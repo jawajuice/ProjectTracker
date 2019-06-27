@@ -18,6 +18,7 @@ class CreateMilestonesTable extends Migration
             $table->timestamps();
             $table->string('milestone_id');
             $table->string('due_on');
+            $table->string('name');
             $table->string('project_id')->references('project_id')->on('projects');
             $table->string('responsible_user')->references('employee_id')->on('employees');
         });

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateTimetrackingTable extends Migration
+class CreateTimetrackingsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateTimetrackingTable extends Migration
      */
     public function up()
     {
-        Schema::create('timetracking', function (Blueprint $table) {
+        Schema::create('timetrackings', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
             $table->string('timetracking_id');
@@ -22,7 +22,7 @@ class CreateTimetrackingTable extends Migration
             $table->string('started_at');
             $table->string('ended_at');
             $table->integer('duration');
-            $table->string('description');
+            $table->text('description');
             $table->string('milestone')->references('milestone_id')->on('milestones');
         });
     }
@@ -34,6 +34,6 @@ class CreateTimetrackingTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('timetracking');
+        Schema::dropIfExists('timetrackings');
     }
 }

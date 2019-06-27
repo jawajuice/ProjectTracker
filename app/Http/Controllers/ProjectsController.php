@@ -19,9 +19,30 @@ class ProjectsController extends Controller
 
 	public function project()
 	{
-		$milestones = Milestone::all();
-		$tasks = Task::all();
-		return view('projects/test', compact('milestones', 'tasks'));
+		$current_date = Carbon::now()->format('Y-m-d');
+		$weekago = Carbon::today()->subWeek()->format('Y-m-d');
+
+		$milestone_ids = array();
+		$project_ids = array();
+		$employees = Employee::where('employee_id', 'f73236ab-6ab0-0b32-ad50-811830023665')->get();
+
+		$timetrackings = Timetracking::where('employee', 'f73236ab-6ab0-0b32-ad50-811830023665')->get();
+		$tasks = Task::where('asignee', 'f73236ab-6ab0-0b32-ad50-811830023665')->whereDate('created_at','>',$weekago)->get();
+
+
+		foreach ($tasks as $task) {
+			$milestone_ids[] = $task->milestone;
+		}
+
+		$milestones = Milestone::where('milestone_id',$milestone_ids)->get();
+		foreach ($milestones as $milestone) {
+			$project_ids[] = $milestone->project_id;
+		}
+
+		$projects = Project::where('project_id',$project_ids)->get();
+	
+		return view('projects/test', compact('milestones', 'tasks', 'timetrackings', 'projects','employees','current_date'));
+
 	}
 
 	public function index()
@@ -29,7 +50,7 @@ class ProjectsController extends Controller
 	    	$current_date = Carbon::now()->format('Y-m-d');
 	    	$n = 1;
 		    $s = 1;
-	    	$timesran = 4;
+	    	$timesran = 1;
 	    	$categories = array('projects.list','users.list','milestones.list','tasks.list','timeTracking.list');
 
 	    	//*******************FILTERS**********************//
@@ -80,7 +101,7 @@ class ProjectsController extends Controller
 	        	array( // tasks.list filter
                 'filter' => array(
 
-                    'due_after'=>$current_date
+                    'due_from'=>$current_date
                 			),
 		        'page' => array(
 		        	'size' => '99',
@@ -163,7 +184,8 @@ class ProjectsController extends Controller
 			        //decode reponse and save project ids into array
 			        $datacontent = json_decode($response, true);
 			        $datacontent = $datacontent['data'];
-			        dd($datacontent);
+		
+			        //*******************WRITE TO DB**********************//
 			        switch ($timesran) {
 			        	case 1:
 					        foreach ($datacontent as $key => $entry) {
@@ -190,11 +212,13 @@ class ProjectsController extends Controller
 								$milestone = Milestone::firstOrCreate(['milestone_id'=> $entry['id']],
 									[
 						            'due_on' => $entry['due_on'],
+						            'name' =>$entry['name'],
 						            'project_id' => $entry['project']['id'],
 						            'responsible_user' => $entry['responsible_user']['id']
 						            ]);
 					        	}
 					        }
+					        dd('dela');
 			
 			        		break;
 			        	case 3:
@@ -220,7 +244,7 @@ class ProjectsController extends Controller
 					        foreach ($datacontent as $key => $entry) {
 				      			
 				      			if (isset($entry['subject']['id'])) {
-								$task = Employee::firstOrCreate(['timetracking_id'=> $entry['id']],
+								$task = Timetracking::firstOrCreate(['timetracking_id'=> $entry['id']],
 									[
 						            'employee' => $entry['user']['id'],
 						            'started_on' => $entry['started_on'],
@@ -232,6 +256,7 @@ class ProjectsController extends Controller
 						            ]);
 					        	}
 					        }
+					        dd('noce');
 			        		break;		        	
 			        	default:
 					        if(isset($datacontent[0]['id'])) {

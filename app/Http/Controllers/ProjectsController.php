@@ -9,148 +9,90 @@ use App\Task;
 use App\Timetracking;
 use App\Project;
 use Carbon\Carbon;
+use App\Mail\WeeklyOverview;
 
 class ProjectsController extends Controller
 {
 	public function task()
 	{
-
+		return 'hi';
 	}
 
-	public function project()
+	public function send()
 	{
+		$allemployees = Employee::all();
 		$current_date = Carbon::now()->format('Y-m-d');
 		$weekago = Carbon::today()->subWeek()->format('Y-m-d');
-
 		$milestone_ids = array();
 		$project_ids = array();
-		$employees = Employee::where('employee_id', 'f73236ab-6ab0-0b32-ad50-811830023665')->get();
 
-		$timetrackings = Timetracking::where('employee', 'f73236ab-6ab0-0b32-ad50-811830023665')->get();
-		$tasks = Task::where('asignee', 'f73236ab-6ab0-0b32-ad50-811830023665')->whereDate('created_at','>',$weekago)->get();
+		foreach ($allemployees as $employee) {
+		
+			$employees = Employee::where('employee_id', $employee->employee_id)->get();
+
+			$timetrackings = Timetracking::where('employee', $employee->employee_id)->whereDate('created_at','>',$weekago)->get();
+			$tasks = Task::where('asignee', $employee->employee_id)->whereDate('created_at','>',$weekago)->get();
 
 
-		foreach ($tasks as $task) {
-			$milestone_ids[] = $task->milestone;
+			foreach ($tasks as $task) {
+				$milestone_ids[] = $task->milestone;
+			}
+
+			foreach ($timetrackings as $timetracking) {
+				$milestone_ids[] = $timetracking->milestone;
+			}
+
+			$milestone_ids = array_unique($milestone_ids);
+			$milestones = Milestone::whereIn('milestone_id',$milestone_ids)->get();
+
+			foreach ($milestones as $milestone) {
+				$project_ids[] = $milestone->project_id;
+			}
+
+			$project_ids = array_unique($project_ids);
+			$projects = Project::whereIn('project_id',$project_ids)->get();
+			$data = compact('milestones', 'tasks', 'timetrackings', 'projects','employees','current_date');
+
+			
+		
+			//\Mail::to('matic@wirelab.nl')->send(new WeeklyOverview($data));
+			return view('projects/test', $data);
+
 		}
-
-		$milestones = Milestone::where('milestone_id',$milestone_ids)->get();
-		foreach ($milestones as $milestone) {
-			$project_ids[] = $milestone->project_id;
-		}
-
-		$projects = Project::where('project_id',$project_ids)->get();
-	
-		return view('projects/test', compact('milestones', 'tasks', 'timetrackings', 'projects','employees','current_date'));
-
 	}
 
-	public function index()
-	    {
+	public function update()
+	{
+	    	$weekago = Carbon::today()->subWeek()->format('Y-m-d');
 	    	$current_date = Carbon::now()->format('Y-m-d');
-	    	$n = 1;
-		    $s = 1;
-	    	$timesran = 1;
+	    	$timesran = 0;
 	    	$categories = array('projects.list','users.list','milestones.list','tasks.list','timeTracking.list');
+	    	$n = 1;
+			$s = 1; 
 
-	    	//*******************FILTERS**********************//
-	    	$filters = array(
-	    		array(//projects.list filter
-	            'page' => array(
-	                'size' =>  99,
-	                'number' => $s
-	            		),
-	            'sort' => [
-	                array(
-	                'field' => 'due_on',
-	                'order' => 'desc'
-	            		)
-	            	]
-	        	),
-	        	array( //users.list filter
-	            'filter' => array(
-	                'status' => array('active')
-	            		),
-	            'page' => array(
-	                'size' => '99',
-	                'number' => '1'
-	            		),
-	            'sort' => [
-	                array(
-	                'field' => 'first_name',
-	                'order' => 'asc'
-	            		)
-	            	]
-	        	),
-	        	array( // milestones.list filter
-                'filter' => array(
-                    'status' => 'open',
-                    'due_after'=>$current_date
-                ),
-	            'page' => array(
-	                'size' => '99',
-	                'number' => $s
-	            		),
-	            'sort' => [
-	                array(
-	                'field' => 'due_on',
-	                'order' => 'asc'
-		            	)
-		            ]
-	        	),
-	        	array( // tasks.list filter
-                'filter' => array(
-
-                    'due_from'=>$current_date
-                			),
-		        'page' => array(
-		        	'size' => '99',
-		        	'number' => $s
-		            		),
-		        'sort' => [
-		        	array(
-		                'field' => 'due_on',
-		                'order' => 'asc'
-		            	)
-		        ]
-		        ),
-		        array(// timeTracking.list filter
-                'page' => array(
-                    'size' => '99',
-                    'number' => 1
-                	),
-                'sort' => [
-                    array(
-                    'field' => 'due_on',
-                    'order' => 'asc'
-                	)
-                ]
-            	)
-	    	);
 	    	//*******************AUTHENTICATION**********************//
 	        $current_date = Carbon::now()->format('Y-m-d');
 	        $clientId = '2ed8911e6006385991f7e286724dfaf9';
 	        $clientSecret = '1cfaace0e0f7c2e771ed466e6d97bbdb';
-	    /**
-	     * Where to redirect to after the OAuth 2 flow was completed.
-	     * Make sure this matches the information of your integration settings on the marketplace build page.
-	     */
-	    $redirectUri = 'http://127.0.0.1:8000/auth';
-	    /* ------------------------------------------------------------------------------------------------- */
-	    /**
-	     * When the OAuth2 authentication flow was completed, the user is redirected back with a code.
-	     * If we received the code, we can get an access token and make API calls. Otherwise we redirect
-	     * the user to the OAuth2 authorization endpoints.
-	     */
+		    /**
+		     * Where to redirect to after the OAuth 2 flow was completed.
+		     * Make sure this matches the information of your integration settings on the marketplace build page.
+		     */
+		    
+		    $redirectUri = 'http://127.0.0.1:8000/auth';
+		    /* ------------------------------------------------------------------------------------------------- */
+		    /**
+		     * When the OAuth2 authentication flow was completed, the user is redirected back with a code.
+		     * If we received the code, we can get an access token and make API calls. Otherwise we redirect
+		     * the user to the OAuth2 authorization endpoints.
+		     */
 	    
 		    if (!empty($_GET['code'])) {
 		        $code = rawurldecode($_GET['code']);
-		        /**
-	         * Request an access token based on the received authorization code.
-	         */
-	      
-
-	        
+		        
+		    	/**
+		         * Request an access token based on the received authorization code.
+		         */
 		        $ch = curl_init();
 		        curl_setopt($ch, CURLOPT_URL, 'https://app.teamleader.eu/oauth2/access_token');
 		        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -164,27 +106,102 @@ class ProjectsController extends Controller
 		        ]);
 		        $response = curl_exec($ch);
 		        $data = json_decode($response, true);
-
 		        $accessToken = $data['access_token'];
-
+		        
 		        while ($timesran < sizeof($categories)) {
-		        //*******************API CALL**********************//
+		        $n = 1;
+				$s = 1; 
 		        $projects = array();
 
 		        while ($n == $s) {
+		        	//*******************FILTERS**********************//
+			    	$filters = array(
+			    		array(//projects.list filter
+			            'page' => array(
+			                'size' =>  '99',
+			                'number' => $s
+			            		),
+			            'sort' => [
+			                array(
+			                'field' => 'due_on',
+			                'order' => 'desc'
+			            		)
+			            	]
+			        	),
+			        	array( //users.list filter
+			            'filter' => array(
+			                'status' => array('active')
+			            		),
+			            'page' => array(
+			                'size' => '99',
+			                'number' => '1'
+			            		),
+			            'sort' => [
+			                array(
+			                'field' => 'first_name',
+			                'order' => 'asc'
+			            		)
+			            	]
+			        	),
+			        	array( // milestones.list filter
+		                'filter' => array(
+		                    'status' => 'open',
+		                    'due_after'=>$weekago
+		                ),
+			            'page' => array(
+			                'size' => '99',
+			                'number' => $s
+			            		),
+			            'sort' => [
+			                array(
+			                'field' => 'due_on',
+			                'order' => 'asc'
+				            	)
+				            ]
+			        	),
+			        	array( // tasks.list filter
+		                'filter' => array(
 
+		                    'due_from'=>$weekago
+		                			),
+				        'page' => array(
+				        	'size' => '99',
+				        	'number' => $s
+				            		),
+				        'sort' => [
+				        	array(
+				                'field' => 'due_on',
+				                'order' => 'asc'
+				            	)
+				        ]
+				        ),
+				        array(// timeTracking.list filter
+		                'page' => array(
+		                    'size' => '99',
+		                    'number' => 1
+		                	),
+		                'sort' => [
+		                    array(
+		                    'field' => 'due_on',
+		                    'order' => 'asc'
+		                	)
+		                ]
+		            	)
+			    	);
+	    			//*******************API CALL**********************//
 			        $ch = curl_init();
 			        curl_setopt($ch, CURLOPT_URL, 'https://api.teamleader.eu/'.$categories[$timesran]);
 			        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 			        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $accessToken]);
-			        curl_setopt($ch, CURLOPT_POSTFIELDS,    http_build_query($filters[$timesran]));
-
+			       	curl_setopt($ch, CURLOPT_POSTFIELDS,    http_build_query($filters[$timesran]));
+			        //curl_setopt($ch, CURLOPT_POSTFIELDS,   'id=7889bbde-f2f9-000a-b266-5adf6e2f7903' );
 			        $response = curl_exec($ch);
 
 			        //decode reponse and save project ids into array
 			        $datacontent = json_decode($response, true);
+			             
 			        $datacontent = $datacontent['data'];
-		
+			
 			        //*******************WRITE TO DB**********************//
 			        switch ($timesran) {
 			        	case 1:
@@ -201,7 +218,7 @@ class ProjectsController extends Controller
 						            ]);
 					        	}
 					        }
-					        dd('works');
+					        $n++;
 			        		break;
 			        	case 2:
 					        foreach ($datacontent as $key => $entry) {
@@ -218,8 +235,8 @@ class ProjectsController extends Controller
 						            ]);
 					        	}
 					        }
-					        dd('dela');
-			
+					      	
+							$n++;
 			        		break;
 			        	case 3:
 					        foreach ($datacontent as $key => $entry) {
@@ -238,7 +255,7 @@ class ProjectsController extends Controller
 						            ]);
 					        	}
 					        }
-					        dd('WORKZ');
+					        $n++;
 			        		break;
 			        	case 4:
 					        foreach ($datacontent as $key => $entry) {
@@ -256,7 +273,7 @@ class ProjectsController extends Controller
 						            ]);
 					        	}
 					        }
-					        dd('noce');
+					        $n++;
 			        		break;		        	
 			        	default:
 					        if(isset($datacontent[0]['id'])) {
@@ -273,16 +290,14 @@ class ProjectsController extends Controller
 						            'due_on' => $entry['due_on']
 						            ]);
 								}
-								   dd('Werk');
+								
 					        }
-
-					        
+					    	$n++;
 			        		break;
-			        		$n++;
 			        }
 		    	}
-		        $timesran++;
-		        }
+		    $timesran++;
+		    }
 			
 	    } else {
 	        //runs if 'code' is not set
@@ -295,8 +310,6 @@ class ProjectsController extends Controller
 	        die;
 	    }
 	    
-	
-
-	         return view('auth.index', compact('data'));
-	    }
+	    return view('auth.index', compact('data'));
+	}
 }

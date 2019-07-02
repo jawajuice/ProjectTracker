@@ -60,8 +60,6 @@ class AuthController extends Controller
             /**
              * Get the user identity information using the access token.
              */
-    /*        $databody = array('id'=>'b8dd0e55-40a5-0902-945c-8f9e94da326c');
-            $databody = json_encode($databody);*/
             $n = 1;
             $s = 1;
             $projects = array();

@@ -10662,3 +10662,7 @@ a.text-dark:focus {
   }
 }
 
+.card {
+  margin-bottom: 20px;
+}
+

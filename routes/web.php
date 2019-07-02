@@ -25,8 +25,12 @@ return 'Finished';
 });
 
 Auth::routes();
-
+Route::get('/task', 'ProjectsController@task');
 Route::get('/home', 'HomeController@index')->name('home');
-Route::get('/auth', 'ProjectsController@index')->name('auth');
+Route::get('/update', 'ProjectsController@update')->name('update');
 Route::get('/users', 'AuthController@users')->name('users');
-Route::get('/project', 'ProjectsController@project');
+Route::get('/send', 'ProjectsController@send');
+
+Route::get('/demo', function () {
+    return new App\Mail\WeeklyOverview();
+});

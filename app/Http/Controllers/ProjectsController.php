@@ -31,8 +31,8 @@ class ProjectsController extends Controller
 			$employees = Employee::where('employee_id', $employee->employee_id)->get();
 
 			$timetrackings = Timetracking::where('employee', $employee->employee_id)->whereDate('created_at','>',$weekago)->get();
-			$tasks = Task::where('asignee', $employee->employee_id)->whereDate('created_at','>',$weekago)->get();
 
+			$tasks = Task::where('asignee', $employee->employee_id)->whereDate('created_at','>',$weekago)->get();
 
 			foreach ($tasks as $task) {
 				$milestone_ids[] = $task->milestone;
@@ -65,12 +65,12 @@ class ProjectsController extends Controller
 	{
 	    	$weekago = Carbon::today()->subWeek()->format('Y-m-d');
 	    	$current_date = Carbon::now()->format('Y-m-d');
-	    	$timesran = 0;
+	    	$timesran = 3;
 	    	$categories = array('projects.list','users.list','milestones.list','tasks.list','timeTracking.list');
 	    	$n = 1;
 			$s = 1; 
 
-	    	//*******************AUTHENTICATION**********************//
+	    	//*******************AUTHENTICATION**********************// 
 	        $current_date = Carbon::now()->format('Y-m-d');
 	        $clientId = '2ed8911e6006385991f7e286724dfaf9';
 	        $clientSecret = '1cfaace0e0f7c2e771ed466e6d97bbdb';
@@ -79,7 +79,7 @@ class ProjectsController extends Controller
 		     * Make sure this matches the information of your integration settings on the marketplace build page.
 		     */
 		    
-		    $redirectUri = 'http://127.0.0.1:8000/auth';
+		    $redirectUri = 'http://127.0.0.1:8000/update';
 		    /* ------------------------------------------------------------------------------------------------- */
 		    /**
 		     * When the OAuth2 authentication flow was completed, the user is redirected back with a code.
@@ -145,7 +145,7 @@ class ProjectsController extends Controller
 			        	),
 			        	array( // milestones.list filter
 		                'filter' => array(
-		                    'status' => 'open',
+		                   
 		                    'due_after'=>$weekago
 		                ),
 			            'page' => array(
@@ -161,7 +161,6 @@ class ProjectsController extends Controller
 			        	),
 			        	array( // tasks.list filter
 		                'filter' => array(
-
 		                    'due_from'=>$weekago
 		                			),
 				        'page' => array(
@@ -194,14 +193,13 @@ class ProjectsController extends Controller
 			        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 			        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $accessToken]);
 			       	curl_setopt($ch, CURLOPT_POSTFIELDS,    http_build_query($filters[$timesran]));
-			        //curl_setopt($ch, CURLOPT_POSTFIELDS,   'id=7889bbde-f2f9-000a-b266-5adf6e2f7903' );
+			        //curl_setopt($ch, CURLOPT_POSTFIELDS,   'id=7478f72e-5c33-0cdf-896c-6c638ea7d3f0' );
 			        $response = curl_exec($ch);
 
 			        //decode reponse and save project ids into array
 			        $datacontent = json_decode($response, true);
-			             
 			        $datacontent = $datacontent['data'];
-			
+
 			        //*******************WRITE TO DB**********************//
 			        switch ($timesran) {
 			        	case 1:
@@ -241,7 +239,8 @@ class ProjectsController extends Controller
 			        	case 3:
 					        foreach ($datacontent as $key => $entry) {
 				      			
-				      			if (isset($entry['milestone'])) {
+				      			if (isset($entry['id'])) {
+				      			$s++;
 								$task = Task::firstOrCreate(['task_id'=> $entry['id']],
 									[
 						            'task_id' => $entry['id'],

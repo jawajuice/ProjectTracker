@@ -13,7 +13,8 @@
              <div class="card">
             <p><h4>Project:</h4></p>  
             <p><h2>{{$project->title}}</h2> </p>
-            
+         
+
             	@foreach($milestones as $milestone)
                 @if($milestone->project_id == $project->project_id)
                  <p><b>Milestones</b>:</p>
@@ -23,21 +24,31 @@
                     <p><b>Tasks</b>:<br></p>
                     @foreach($tasks as $task)
                         @if($task->milestone == $milestone->milestone_id)
-                            <p>{{$task->description}} - Estimated time: {{$task->est_duration}} minutes.</p>
+                            <p>{{$task->description}} - Estimated time: {{$task->task_id}} minutes.</p>
+                            @foreach($timetrackings as $timetracking)
+                                @if($timetracking->milestone == $task->task_id)
+                                    <h4>TIMETRACKING</h4>
+                                    <p><b>{{$timetracking->description}} - Duration: {{$timetracking->duration}} minutes.</b></p>
+                                @endif
+                            @endforeach
                         @endif
                     @endforeach
 
                     <p><b>Time tracking</b>:<br></p>
 
                     @foreach($timetrackings as $timetracking)
-
                         @if($timetracking->milestone == $milestone->milestone_id)
                             <p>{{$timetracking->description}} - Duration: {{$timetracking->duration}} minutes.</p>
                         @endif
+
                     @endforeach
                 @endif
                 @endforeach
                 </div>
+            @endforeach
+        
+            @foreach($tasks as $task)
+            {{$task->description}}
             @endforeach
         
         </div>

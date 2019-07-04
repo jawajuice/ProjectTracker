@@ -41,7 +41,6 @@ class ProjectsController extends Controller
 			foreach ($timetrackings as $timetracking) {
 				$milestone_ids[] = $timetracking->milestone;
 			}
-
 			$milestone_ids = array_unique($milestone_ids);
 			$milestones = Milestone::whereIn('milestone_id',$milestone_ids)->get();
 
@@ -65,7 +64,7 @@ class ProjectsController extends Controller
 	{
 	    	$weekago = Carbon::today()->subWeek()->format('Y-m-d');
 	    	$current_date = Carbon::now()->format('Y-m-d');
-	    	$timesran = 3;
+	    	$timesran = 0;
 	    	$categories = array('projects.list','users.list','milestones.list','tasks.list','timeTracking.list');
 	    	$n = 1;
 			$s = 1; 
@@ -196,7 +195,7 @@ class ProjectsController extends Controller
 			        //curl_setopt($ch, CURLOPT_POSTFIELDS,   'id=7478f72e-5c33-0cdf-896c-6c638ea7d3f0' );
 			        $response = curl_exec($ch);
 
-			        //decode reponse and save project ids into array
+			        //decode response and save project ids into array
 			        $datacontent = json_decode($response, true);
 			        $datacontent = $datacontent['data'];
 
@@ -219,11 +218,13 @@ class ProjectsController extends Controller
 					        $n++;
 			        		break;
 			        	case 2:
+					        if (isset($datacontent[0]['id'])) {
+					        	$s++;
+					        }
 					        foreach ($datacontent as $key => $entry) {
 				      			
 				      			if (isset($entry['responsible_user'])) {
 				      	
-				      			$s++;
 								$milestone = Milestone::firstOrCreate(['milestone_id'=> $entry['id']],
 									[
 						            'due_on' => $entry['due_on'],
@@ -237,10 +238,14 @@ class ProjectsController extends Controller
 							$n++;
 			        		break;
 			        	case 3:
+			       
+					        if (isset($datacontent[0]['id'])) {
+					        	$s++;
+					        }
 					        foreach ($datacontent as $key => $entry) {
+
+				      			if (isset($entry['milestone']['id'])) {
 				      			
-				      			if (isset($entry['id'])) {
-				      			$s++;
 								$task = Task::firstOrCreate(['task_id'=> $entry['id']],
 									[
 						            'task_id' => $entry['id'],
@@ -254,6 +259,7 @@ class ProjectsController extends Controller
 						            ]);
 					        	}
 					        }
+					        
 					        $n++;
 			        		break;
 			        	case 4:
@@ -275,8 +281,10 @@ class ProjectsController extends Controller
 					        $n++;
 			        		break;		        	
 			        	default:
+					        if (isset($datacontent[0]['id'])) {
+					        	$s++;
+					        }
 					        if(isset($datacontent[0]['id'])) {
-					            $s++;
 					            foreach ($datacontent as $key => $entry) {
 								$project = Project::firstOrCreate(['project_id'=> $entry['id']],
 									[

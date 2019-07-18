@@ -108,7 +108,6 @@ class AuthController extends Controller
             }
 
             }
-            
             $n++;
 
         //}
@@ -125,9 +124,7 @@ class AuthController extends Controller
             $data = json_decode($response, true);
             $data = $data['data'];
 
-            
-            var_dump($data);
-            die;
+
             }
 
 
@@ -226,7 +223,6 @@ class AuthController extends Controller
         //decode reponse and save project ids into array
         $data = json_decode($response, true);
 
-        dd($data);
         $data = $data['data'];
 
         if(isset($data[0]['id'])) {
@@ -253,8 +249,6 @@ class AuthController extends Controller
         $data = $data['data'];
 
         
-        var_dump($data);
-        die;
         }
 
 

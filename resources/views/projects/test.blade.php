@@ -11,15 +11,13 @@
                       
             @foreach($projects as $project)
              <div class="card">
-            <p><h4>Project:</h4></p>  
+            <p><h4>Project:</h4></p>
             <p><h2>{{$project->title}}</h2> </p>
-         
 
             	@foreach($milestones as $milestone)
                 @if($milestone->project_id == $project->project_id)
                  <p><b>Milestones</b>:</p>
             	<p>{{$milestone->name}} Due: {{$milestone->due_on}} - {{ $milestone->milestone_id}}</p>
-
 
                     <p><b>Tasks</b>:<br></p>
                     @foreach($tasks as $task)
@@ -47,7 +45,7 @@
                 </div>
             @endforeach
         
-            @foreach($tasks as $task)
+            @foreach($timetrackings as $task)
             {{$task->description}}
             @endforeach
         

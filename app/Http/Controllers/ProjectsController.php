@@ -53,7 +53,7 @@ class ProjectsController extends Controller
 			$data = compact('milestones', 'tasks', 'timetrackings', 'projects','employees','current_date');
 
 			
-		
+			//dd($tasks);
 			//\Mail::to('matic@wirelab.nl')->send(new WeeklyOverview($data));
 			return view('projects/test', $data);
 
@@ -192,13 +192,13 @@ class ProjectsController extends Controller
 			        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 			        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $accessToken]);
 			       	curl_setopt($ch, CURLOPT_POSTFIELDS,    http_build_query($filters[$timesran]));
+			        
 			        //curl_setopt($ch, CURLOPT_POSTFIELDS,   'id=7478f72e-5c33-0cdf-896c-6c638ea7d3f0' );
 			        $response = curl_exec($ch);
 
 			        //decode response and save project ids into array
 			        $datacontent = json_decode($response, true);
 			        $datacontent = $datacontent['data'];
-
 			        //*******************WRITE TO DB**********************//
 			        switch ($timesran) {
 			        	case 1:

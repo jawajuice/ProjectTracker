@@ -50,7 +50,24 @@ class ProjectsController extends Controller
 
 			$project_ids = array_unique($project_ids);
 			$projects = Project::whereIn('project_id',$project_ids)->get();
-			$data = compact('milestones', 'tasks', 'timetrackings', 'projects','employees','current_date');
+			foreach ($projects as $project) {
+				$id = $project->project_id;
+				$start = strtotime($project->starts_on);
+				$finish = strtotime($project->due_on);
+				$now = strtotime($current_date);
+				//days between From and To
+				$datediffA = round(($finish- $start) / (60 * 60 * 24));
+				//days between From and Current
+				$datediffB =  round(($now- $start) / (60 * 60 * 24));
+				
+				# code...
+
+				$percentage = ($datediffB*100)/$datediffA;
+				$project_time[$id] =floor($percentage);
+
+			}
+		;
+			$data = compact('milestones', 'tasks', 'timetrackings', 'projects','employees','current_date','project_time');
 
 			
 			//dd($tasks);

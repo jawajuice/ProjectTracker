@@ -13,7 +13,17 @@
              <div class="card">
             <p><h4>Project:</h4></p>
             <p><h2>{{$project->title}}</h2> </p>
-
+            <div class="set-size charts-container">
+              <div class="pie-wrapper progress-{{$project_time[$project->project_id]}}">
+                
+            
+                <span class="label">{{$project_time[$project->project_id]}}<span class="smaller">%</span></span>
+                <div class="pie">
+                  <div class="left-side half-circle"></div>
+                  <div class="right-side half-circle"></div>
+                </div>
+              </div>
+            </div>   
             	@foreach($milestones as $milestone)
                 @if($milestone->project_id == $project->project_id)
                  <p><b>Milestones</b>:</p>
